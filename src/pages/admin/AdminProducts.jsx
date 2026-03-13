@@ -6,7 +6,8 @@ import toast from 'react-hot-toast'
 const EMPTY = {
   name: '', description: '', pricePerStem: '', minOrderQuantity: 50,
   stockQuantity: 0, imageUrl: '', color: '', originCountry: '',
-  stemLengthCm: '', season: '', vaseLifeDays: '', isFeatured: false, categoryId: ''
+  stemLengthCm: '', season: '', vaseLifeDays: '',
+  isFeatured: false, isActive: true, categoryId: ''
 }
 
 export default function AdminProducts() {
@@ -23,7 +24,14 @@ export default function AdminProducts() {
   useEffect(() => { load() }, [])
 
   const openAdd  = () => { setForm(EMPTY); setModal('add') }
-  const openEdit = p  => { setForm({ ...p, categoryId: p.categoryId || '' }); setModal(p) }
+  const openEdit = p  => {
+    setForm({
+      ...p,
+      categoryId: p.categoryId || '',
+      isActive: p.isActive !== undefined ? p.isActive : true
+    })
+    setModal(p)
+  }
   const closeModal = () => setModal(null)
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -38,7 +46,8 @@ export default function AdminProducts() {
         stockQuantity:    Number(form.stockQuantity),
         stemLengthCm:     Number(form.stemLengthCm) || null,
         vaseLifeDays:     Number(form.vaseLifeDays) || null,
-        categoryId:       form.categoryId ? Number(form.categoryId) : null
+        categoryId:       form.categoryId ? Number(form.categoryId) : null,
+        isActive:         form.isActive
       }
       if (modal === 'add') await adminAPI.createProduct(payload)
       else                 await adminAPI.updateProduct(modal.id, payload)
@@ -92,11 +101,11 @@ export default function AdminProducts() {
                 <td>
                   <span style={{
                     fontSize: 11, fontWeight: 700,
-                    color: p.stockQuantity > 0 ? '#065f46' : '#991b1b',
-                    background: p.stockQuantity > 0 ? '#d1fae5' : '#fee2e2',
+                    color: p.isActive ? '#065f46' : '#991b1b',
+                    background: p.isActive ? '#d1fae5' : '#fee2e2',
                     padding: '3px 10px', borderRadius: 20
                   }}>
-                    {p.stockQuantity > 0 ? 'Active' : 'Out of Stock'}
+                    {p.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </td>
                 <td>
@@ -115,7 +124,6 @@ export default function AdminProducts() {
         </table>
       </div>
 
-      {/* Add / Edit Modal */}
       {modal && (
         <div className="modal-overlay" onClick={closeModal}>
           <div style={{
@@ -187,13 +195,26 @@ export default function AdminProducts() {
                     value={form.description} onChange={e => set('description', e.target.value)} />
                 </div>
 
-                <div className="form-group" style={{ gridColumn: '1 / span 2', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <input type="checkbox" id="featured"
-                    checked={form.isFeatured} onChange={e => set('isFeatured', e.target.checked)}
-                    style={{ width: 16, height: 16 }} />
-                  <label htmlFor="featured" className="form-label" style={{ margin: 0 }}>
-                    Mark as Bestseller ⭐
-                  </label>
+                {/* ✅ isActive and isFeatured checkboxes */}
+                <div className="form-group" style={{ gridColumn: '1 / span 2', display: 'flex', gap: 24 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <input type="checkbox" id="featured"
+                      checked={form.isFeatured}
+                      onChange={e => set('isFeatured', e.target.checked)}
+                      style={{ width: 16, height: 16 }} />
+                    <label htmlFor="featured" className="form-label" style={{ margin: 0 }}>
+                      Mark as Bestseller ⭐
+                    </label>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <input type="checkbox" id="isActive"
+                      checked={form.isActive}
+                      onChange={e => set('isActive', e.target.checked)}
+                      style={{ width: 16, height: 16 }} />
+                    <label htmlFor="isActive" className="form-label" style={{ margin: 0 }}>
+                      Active (visible to buyers) ✅
+                    </label>
+                  </div>
                 </div>
               </div>
 
