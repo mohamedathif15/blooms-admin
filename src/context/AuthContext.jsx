@@ -11,11 +11,17 @@ export default function AuthProvider({ children }) {
   })
 
   const login = async (email, password) => {
-    const { data } = await axios.post('/api/auth/login', { email, password })
+    const { data } = await axios.post(
+      'https://blooms-backend-production.up.railway.app/api/auth/login',
+      { email, password }
+    )
+
     if (data.role !== 'ADMIN') throw new Error('Not admin')
+
     localStorage.setItem('bl_admin_token', data.token)
     localStorage.setItem('bl_admin_user', JSON.stringify(data))
     setUser(data)
+
     return data
   }
 
